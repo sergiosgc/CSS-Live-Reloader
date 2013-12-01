@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+use Net::WebSocket::Server;
+use File::Find;
+use Linux::Inotify2;
+use AnyEvent;
+use strict;
+
+my $childPid = fork;
+if ($childPid == 0) {
+    my $currentConnection;
+    $SIG{HUP} = sub { 
+        eval {
+            $currentConnection->send("notification\n"); 
+        };
+        if ($@) {
+            print "No connection available. Update not sent.";
+        }
+    };
+    
+    my $socket = IO::Socket::INET->new(
+        Listen    => 5,
+        LocalPort => 3000,
+        Proto     => 'tcp',
+        ReuseAddr => 1,
+    );
+
+
+    my $server = Net::WebSocket::Server->new(
+        listen => $socket,
+        on_connect => sub {
+            my ($serv, $conn) = @_;
+            print "Connected\n";
+            $currentConnection = $conn;
+        },
+    );
+    $server->start;
+} else {
+    $SIG{INT} = sub { kill 'KILL', $childPid };
+    my $inotify = new Linux::Inotify2;
+
+    sub new_file {
+        my $e = shift;
+        my $file = $e->fullname;
+        kill 'HUP', $childPid;
+        register_file($file);
+    }
+    sub file_gone {
+        my $e = shift;
+        my $file = $e->fullname;
+        kill 'HUP', $childPid;
+        $e->w->cancel();
+    }
+    sub file_changed {
+        kill 'HUP', $childPid;
+    }
+    sub register_file {
+        my $file = $_;
+
+        if (-f $file) {
+            $inotify->watch($file, IN_MODIFY | IN_ATTRIB, \&file_changed);
+        } elsif (-d $file) {
+            $inotify->watch($file, IN_MOVED_FROM | IN_DELETE, \&file_gone);
+            $inotify->watch($file, IN_MOVED_TO | IN_CREATE, \&new_file);
+        }
+    }
+
+
+    find(\&register_file, ('/home/sergio.carvalho/websocket/'));
+
+    my $inotify_w = AnyEvent->io (
+        fh => $inotify->fileno, poll => 'r', cb => sub { $inotify->poll }
+     );
+
+    1 while $inotify->poll;
+
+}
