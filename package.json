@@ -1,9 +1,12 @@
 {
   "name": "css-live-reloader",
   "fullName": "css-live-reloader",
+  "homepage": "https://github.com/sergiosgc/CSS-Live-Reloader",
   "id": "csslivereloader@sergiosgc.com",
-  "description": "Live CSS reloader",
-  "author": "",
+  "description": "Reloads a page CSS when the user presses F9 or when a change is reported by the server via a WebSockets channel",
+  "icon": "assets/icon.png",
+  "icon": "assets/icon64.png",
+  "author": "Sergio Carvalho",
   "license": "MPL 2.0",
-  "version": "0.1"
+  "version": "1.0"
 }
