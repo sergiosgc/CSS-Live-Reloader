@@ -4,8 +4,8 @@
   "homepage": "https://github.com/sergiosgc/CSS-Live-Reloader",
   "id": "csslivereloader@sergiosgc.com",
   "description": "Reloads a page CSS when the user presses F9 or when a change is reported by the server via a WebSockets channel",
-  "icon": "assets/icon.png",
-  "icon": "assets/icon64.png",
+  "icon": "assets/logo.png",
+  "icon": "assets/logo64.png",
   "author": "Sergio Carvalho",
   "license": "MPL 2.0",
   "version": "1.0"
