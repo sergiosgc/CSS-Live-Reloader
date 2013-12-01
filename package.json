@@ -1,0 +1,9 @@
+{
+  "name": "css-live-reloader",
+  "fullName": "css-live-reloader",
+  "id": "csslivereloader@sergiosgc.com",
+  "description": "Live CSS reloader",
+  "author": "",
+  "license": "MPL 2.0",
+  "version": "0.1"
+}
