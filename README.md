@@ -1,4 +1,5 @@
-= CSS Live Reloader =
+CSS Live Reloader
+=================
 
 CSS Live Reloader is a firefox extension to ease website CSS development. The extension reloads a page CSS whenever it changes on the server, resulting in something close to live editing of the Cascading Stylesheet. 
 
