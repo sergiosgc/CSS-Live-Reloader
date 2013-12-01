@@ -24,3 +24,14 @@ cd /usr/local/bin
 sudo wget https://raw.github.com/sergiosgc/CSS-Live-Reloader/master/notifiers/linux/clr-notifier
 sudo chmod a+x clr-notifier
 ```
+
+Usage
+-----
+
+To use, just `cd` to the directory containing your project's CSS files and run the notifier:
+```shell
+cd .../my_project_dir/css
+clr-notifier
+```
+
+Then, visit the page that uses the CSS and press F9. The extension will reload the CSS and establish a connection to the notification server. Now, edit away your CSS files. The page will refresh automatically!
