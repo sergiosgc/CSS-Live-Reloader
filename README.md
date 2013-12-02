@@ -8,3 +8,6 @@ To detect changes to the CSS, the extension relies on a daemon running on the sa
 Even without a notifier running, the extension behaves normally, albeit without the live component. You may press F9 to request a refresh of the current page CSS.
 
 
+You can see it in action in this demo video:
+
+[![ScreenShot](https://raw.github.com/sergiosgc/CSS-Live-Reloader/master/assets/demo_screenshot.png)](//player.vimeo.com/video/80764772)
