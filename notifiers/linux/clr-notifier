@@ -1,19 +1,25 @@
 #!/usr/bin/perl
+use Cwd;
 use Net::WebSocket::Server;
 use File::Find;
 use Linux::Inotify2;
 use AnyEvent;
+use Time::HiRes qw ( ualarm );
 use strict;
 
 my $childPid = fork;
 if ($childPid == 0) {
     my $currentConnection;
-    $SIG{HUP} = sub { 
+    $SIG{HUP} = sub {
+        ualarm(200_000);
+    };
+    $SIG{ALRM} = sub {
         eval {
             $currentConnection->send("notification\n"); 
+            print "Notified change\n\n";
         };
         if ($@) {
-            print "No connection available. Update not sent.";
+            print "No connection available. Update not sent.\n\n";
         }
     };
     
@@ -40,32 +46,51 @@ if ($childPid == 0) {
 
     sub new_file {
         my $e = shift;
-        my $file = $e->fullname;
-        kill 'HUP', $childPid;
-        register_file($file);
+        my $file = $e->{name};
+        if ($file =~ /([~]|\.swp|\.swx|(^\d+))$/) {
+            return;
+        }
+	print "New file: $file \n";
+        if (follow_file($file)) {
+            kill 'HUP', $childPid;
+        }
     }
     sub file_gone {
         my $e = shift;
-        my $file = $e->fullname;
+        my $file = $e->{name};;
         kill 'HUP', $childPid;
+	print "File gone: " . $file . "\n";
         $e->w->cancel();
     }
     sub file_changed {
+        my $e = shift;
+        my $file = $e->fullname;
         kill 'HUP', $childPid;
+	print "File changed: " . $file . "\n";
     }
     sub register_file {
         my $file = $_;
+        return follow_file($file);
+    }
+    sub follow_file {
+        my $file = shift;
 
+        if ($file =~ /([~]|\.swp)$/) {
+            return 0;
+        }
+
+	print "Following: $file \n";
         if (-f $file) {
-            $inotify->watch($file, IN_MODIFY | IN_ATTRIB, \&file_changed);
+            $inotify->watch($file, IN_MODIFY , \&file_changed);
         } elsif (-d $file) {
             $inotify->watch($file, IN_MOVED_FROM | IN_DELETE, \&file_gone);
             $inotify->watch($file, IN_MOVED_TO | IN_CREATE, \&new_file);
         }
+	return 1;
     }
 
 
-    find(\&register_file, ('/home/sergio.carvalho/websocket/'));
+    find(\&register_file, (getcwd));
 
     my $inotify_w = AnyEvent->io (
         fh => $inotify->fileno, poll => 'r', cb => sub { $inotify->poll }
